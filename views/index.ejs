@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Herramienta de Mensajes Directos Personalizados</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container { 
+      background: white; 
+      padding: 25px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #3897f0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group { 
+      margin-bottom: 20px; 
+    }
+    label { 
+      display: block; 
+      margin-bottom: 8px; 
+      font-weight: bold;
+      color: #555;
+    }
+    input[type="text"], textarea, select { 
+      width: 100%; 
+      padding: 12px; 
+      border: 1px solid #ddd; 
+      border-radius: 6px; 
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: #3897f0;
+      outline: none;
+    }
+    textarea { 
+      min-height: 120px; 
+      resize: vertical;
+    }
+    button { 
+      background: linear-gradient(to right, #3897f0, #38a1f0); 
+      color: white; 
+      border: none; 
+      padding: 12px 25px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 16px;
+      font-weight: bold;
+      width: 100%;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    button:hover { 
+      background: linear-gradient(to right, #287abd, #2888bd);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .note { 
+      font-size: 0.85em; 
+      color: #777; 
+      margin-top: 5px;
+      font-style: italic;
+    }
+    .error { 
+      color: #e74c3c; 
+      font-weight: bold;
+    }
+    .tabs { 
+      display: flex; 
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab { 
+      padding: 12px 20px; 
+      cursor: pointer; 
+      background: #f1f1f1; 
+      margin-right: 5px; 
+      border-radius: 6px 6px 0 0;
+      transition: all 0.3s;
+    }
+    .tab.active { 
+      background: #3897f0; 
+      color: white;
+    }
+    .tab:hover:not(.active) {
+      background: #e1e1e1;
+    }
+    .tab-content { 
+      display: none; 
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 0 0 6px 6px;
+      border-top: none;
+      background: white;
+    }
+    .tab-content.active { 
+      display: block; 
+    }
+    .template-section {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px dashed #ddd;
+    }
+    .variables-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+    .variable {
+      display: inline-block;
+      background: #e1f0ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 5px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Herramienta de Mensajes Directos Personalizados</h1>
+    <p>Envía mensajes únicos a cada usuario con variables y generación por IA.</p>
+    
+    <form action="/send" method="POST">
+      <div class="form-group">
+        <label for="sessionid">Session ID de Instagram:</label>
+        <input type="text" id="sessionid" name="sessionid" required placeholder="Ej: 1234567890%3Aabcdefg%3A12%3AAYdef...">
+        <p class="note">Cómo obtener tu Session ID: Abre Instagram en Chrome, presiona F12 > Application > Cookies > https://www.instagram.com. Busca "sessionid" y copia su valor.</p>
+      </div>
+      
+      <div class="form-group">
+        <label for="users">Cuentas de destino (1 por línea, máximo 50):</label>
+        <textarea id="users" name="users" required placeholder="Ejemplo: usuario1&#10;usuario2&#10;usuario3"></textarea>
+        <p class="note">Puedes incluir @ o no. No incluir URLs.</p>
+      </div>
+      
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('single')">Mensaje único</div>
+        <div class="tab" onclick="switchTab('variations')">Variaciones</div>
+      </div>
+      
+      <div id="single-tab" class="tab-content active">
+        <div class="form-group">
+          <label for="message">Mensaje a enviar:</label>
+          <textarea id="message" name="message"><%= defaultMessage %></textarea>
+        </div>
+      </div>
+      
+      <div id="variations-tab" class="tab-content">
+        <div class="form-group">
+          <label for="messages_variations">Variaciones de mensaje (1 por línea):</label>
+          <textarea id="messages_variations" name="messages_variations"><%= defaultMessagesVariations %></textarea>
+          <p class="note">Formato: Variación 1: Texto del mensaje<br>Variación 2: Otro texto<br>Variación 3: Más texto</p>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="custom_context">Contexto para personalización (opcional):</label>
+        <textarea id="custom_context" name="custom_context" placeholder="Ej: Quiero hablar sobre colaboración de marketing, somos de la misma ciudad"></textarea>
+        <p class="note">Proporciona detalles que ayudarán a personalizar los mensajes con IA.</p>
+      </div>
+      
+      <div class="template-section">
+        <div class="form-group">
+          <label for="template-selector">Plantillas rápidas:</label>
+          <select id="template-selector" onchange="applyTemplate(this)" class="form-control">
+            <option value="">Seleccionar plantilla...</option>
+            <% templates.forEach(template => { %>
+              <option value="<%= template.value %>"><%= template.name %></option>
+            <% }); %>
+          </select>
+          <p class="note">Selecciona una plantilla para aplicarla automáticamente</p>
+        </div>
+      </div>
+      
+      <div class="variables-info">
+        <h3>Variables disponibles:</h3>
+        <p><span class="variable">{target}</span> - Nombre de usuario del destinatario</p>
+        <p><span class="variable">{username}</span> - Tu nombre de usuario</p>
+        <p><span class="variable">{ai}</span> - Texto generado por inteligencia artificial</p>
+        <p><span class="variable">{topic}</span> - Tema del contexto proporcionado</p>
+        <p class="note">Ejemplo: "Hola {target}, vi que trabajas en {topic}. {ai}"</p>
+      </div>
+      
+      <button type="submit" id="submit-btn">Enviar Mensajes Personalizados</button>
+    </form>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      // Cambiar pestañas activas
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Activar la pestaña seleccionada
+      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+    
+    function applyTemplate(select) {
+      const template = select.value;
+      if (template) {
+        const activeTab = document.querySelector('.tab-content.active').id;
+        if (activeTab === 'single-tab') {
+          document.getElementById('message').value = template;
+        } else {
+          // Crear 3 variaciones basadas en la plantilla
+          const variations = [
+            `Variación 1: ${template}`,
+            `Variación 2: ${template.replace('Hola', '¡Hola').replace('!', '! ')}`,
+            `Variación 3: ${template.replace('Hola', 'Hola,')}`
+          ].join('\n');
+          document.getElementById('messages_variations').value = variations;
+        }
+      }
+    }
+    
+    // Validación antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const sessionid = document.getElementById('sessionid').value;
+      const users = document.getElementById('users').value;
+      
+      if (!sessionid || !users) {
+        alert('Por favor completa los campos requeridos: Session ID y Cuentas de destino');
+        e.preventDefault();
+        return;
+      }
+      
+      const userCount = users.split('\n').filter(u => u.trim().length > 0).length;
+      if (userCount > 50) {
+        alert('Máximo 50 cuentas permitidas por envío');
+        e.preventDefault();
+        return;
+      }
+      
+      // Deshabilitar botón para evitar múltiples envíos
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-btn').textContent = 'Enviando... (Esto puede tomar varios minutos)';
+    });
+  </script>
+</body>
+</html>

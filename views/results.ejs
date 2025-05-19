@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados de Envío</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .container { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+    h1 { color: #3897f0; }
+    .result-item { padding: 10px; margin: 5px 0; border-radius: 4px; }
+    .success { background: #e6f7e6; border-left: 4px solid #4CAF50; }
+    .error { background: #ffebee; border-left: 4px solid #F44336; }
+    .message-preview { background: #fff; padding: 10px; border-radius: 4px; margin: 15px 0; }
+    .back-link { display: inline-block; margin-top: 20px; color: #3897f0; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <% if (error) { %>
+      <h1>Error</h1>
+      <div class="error result-item">
+        <p><%= error %></p>
+      </div>
+    <% } else { %>
+      <h1>Resultados del Envío</h1>
+      <p>Conectado como: <strong>@<%= username %></strong></p>
+      
+      <div class="message-preview">
+        <h3>Mensaje enviado:</h3>
+        <p>"<%= messageSent %>"</p>
+      </div>
+      
+      <h2>Detalle por cuenta:</h2>
+      <% results.forEach(result => { %>
+        <div class="result-item <%= result.status %>">
+          <p><strong>@<%= result.user %>:</strong> <%= result.message %></p>
+        </div>
+      <% }); %>
+    <% } %>
+    
+    <a href="/" class="back-link">← Volver al inicio</a>
+  </div>
+</body>
+</html>
