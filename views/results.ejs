@@ -8,39 +8,67 @@
     body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
     .container { background: #f9f9f9; padding: 20px; border-radius: 8px; }
     h1 { color: #3897f0; }
-    .result-item { padding: 10px; margin: 5px 0; border-radius: 4px; }
-    .success { background: #e6f7e6; border-left: 4px solid #4CAF50; }
-    .error { background: #ffebee; border-left: 4px solid #F44336; }
-    .message-preview { background: #fff; padding: 10px; border-radius: 4px; margin: 15px 0; }
-    .back-link { display: inline-block; margin-top: 20px; color: #3897f0; text-decoration: none; }
-    .back-link:hover { text-decoration: underline; }
+    .result-item { margin: 15px 0; padding: 15px; border-radius: 5px; }
+    .success { background-color: #e8f5e9; border-left: 5px solid #4caf50; }
+    .error { background-color: #ffebee; border-left: 5px solid #f44336; }
+    .message-preview { margin-top: 10px; padding: 10px; background: white; border-radius: 3px; }
+    .back-btn { 
+      display: inline-block; 
+      margin-top: 20px; 
+      padding: 10px 20px; 
+      background: #3897f0; 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 4px; 
+    }
+    .back-btn:hover { background: #287abd; }
+    .summary { 
+      margin: 20px 0; 
+      padding: 15px; 
+      background: #e3f2fd; 
+      border-radius: 5px; 
+      display: flex; 
+      justify-content: space-between; 
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <% if (error) { %>
-      <h1>Error</h1>
+      <h1>Error en el Proceso</h1>
       <div class="error result-item">
-        <p><%= error %></p>
+        <p><strong>Error:</strong> <%= error %></p>
       </div>
     <% } else { %>
-      <h1>Resultados del Envío</h1>
-      <p>Conectado como: <strong>@<%= username %></strong></p>
+      <h1>Resultados para @<%= username %></h1>
       
-      <div class="message-preview">
-        <h3>Mensaje enviado:</h3>
-        <p>"<%= messageSent %>"</p>
+      <div class="summary">
+        <div>
+          <strong>Total:</strong> <%= results.length %> usuarios<br>
+          <strong>Mensaje:</strong> <%= messageSent %>
+        </div>
+        <div>
+          <strong>Éxitos:</strong> <%= results.filter(r => r.status === 'success').length %><br>
+          <strong>Errores:</strong> <%= results.filter(r => r.status === 'error').length %>
+        </div>
       </div>
       
-      <h2>Detalle por cuenta:</h2>
       <% results.forEach(result => { %>
-        <div class="result-item <%= result.status %>">
-          <p><strong>@<%= result.user %>:</strong> <%= result.message %></p>
+        <div class="<%= result.status %> result-item">
+          <strong>@<%= result.user %>:</strong> 
+          <span style="color: <%= result.status === 'success' ? '#4caf50' : '#f44336' %>">
+            <%= result.message %>
+          </span>
+          <% if (result.sentMessage) { %>
+            <div class="message-preview">
+              <em>"<%= result.sentMessage %>"</em>
+            </div>
+          <% } %>
         </div>
       <% }); %>
     <% } %>
     
-    <a href="/" class="back-link">← Volver al inicio</a>
+    <a href="/" class="back-btn">Volver al Inicio</a>
   </div>
 </body>
 </html>
